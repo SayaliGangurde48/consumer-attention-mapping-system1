@@ -1,2 +1,1 @@
-# consumer-attention-mapping-system
-Infosys Internship - Consumer Attention Mapping System
+# Consumer-Attention-Mapping-System
