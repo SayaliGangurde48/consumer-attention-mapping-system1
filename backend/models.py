@@ -99,3 +99,24 @@ class ShopperSession(Base):
     path_length = Column(Float, default=0)
 
     segment = Column(String(50), default="Unknown")
+class Product(Base):
+    __tablename__ = "products"
+
+    id = Column(Integer, primary_key=True, index=True)
+
+    product_name = Column(String(255), nullable=False)
+
+    shelf_id = Column(
+        Integer,
+        ForeignKey("shelves.id"),
+        nullable=False
+    )
+
+    views = Column(Integer, default=0)
+    pickups = Column(Integer, default=0)
+    purchases = Column(Integer, default=0)
+
+    attention_duration = Column(Float, default=0)
+    attractiveness_score = Column(Float, default=0)
+
+    shelf = relationship("Shelf")

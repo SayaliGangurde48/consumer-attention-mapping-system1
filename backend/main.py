@@ -10,7 +10,8 @@ from models import (
     Store,
     Shelf,
     AttentionRecord,
-    ShopperSession
+    ShopperSession,
+    Product
 )
 from schemas import UserRegister, UserLogin, StoreCreate, ShelfCreate
 from auth import hash_password, verify_password, create_access_token
@@ -286,43 +287,63 @@ def get_store_heatmap():
 @app.get("/api/product-score")
 def product_score(db: Session = Depends(get_db)):
 
-    total_attention = (
-        db.query(
-            func.sum(
-                AttentionRecord.total_attention_duration
-            )
-        ).scalar() or 0
-    )
+    products = db.query(Product).all()
 
-    interaction_frequency = (
-        db.query(AttentionRecord).count()
-    )
+    results = []
 
-    score = calculate_attractiveness_score(
-        attention_duration=total_attention,
-        interaction_frequency=interaction_frequency,
+    for product in products:
 
-        pickup_rate=0,
-        conversion_rate=0,
-        repeat_engagement=0,
+        pickup_rate = (
+            (product.pickups / product.views) * 100
+            if product.views > 0
+            else 0
+        )
 
-        store_average_attention=50,
-        store_average_interaction=10,
-        store_average_pickup=10,
-        store_average_conversion=10,
-        store_average_repeat=10
-    )
+        conversion_rate = (
+            (product.purchases / product.pickups) * 100
+            if product.pickups > 0
+            else 0
+        )
 
-    recommendation = generate_recommendation(
-        attention_duration=total_attention,
-        pickup_rate=0,
-        conversion_rate=0,
-        attractiveness_score=score
-    )
+        score = calculate_attractiveness_score(
+            attention_duration=product.attention_duration,
+            interaction_frequency=product.views,
+            pickup_rate=pickup_rate,
+            conversion_rate=conversion_rate,
+            repeat_engagement=0,
+
+            store_average_attention=50,
+            store_average_interaction=10,
+            store_average_pickup=10,
+            store_average_conversion=10,
+            store_average_repeat=10
+        )
+
+        recommendations = generate_recommendation(
+            views=product.views,
+            pickups=product.pickups,
+            purchases=product.purchases,
+            attention_duration=product.attention_duration,
+            attractiveness_score=score
+        )
+
+        product.attractiveness_score = score
+
+        results.append({
+            "product_id": product.id,
+            "product_name": product.product_name,
+            "views": product.views,
+            "pickups": product.pickups,
+            "purchases": product.purchases,
+            "pickup_rate": round(pickup_rate, 2),
+            "conversion_rate": round(conversion_rate, 2),
+            "attention_duration": product.attention_duration,
+            "attractiveness_score": score,
+            "recommendation": recommendations
+        })
+
+    db.commit()
 
     return {
-        "total_attention": total_attention,
-        "interaction_frequency": interaction_frequency,
-        "attractiveness_score": score,
-        "recommendation": recommendation
-}
+        "products": results
+    }
