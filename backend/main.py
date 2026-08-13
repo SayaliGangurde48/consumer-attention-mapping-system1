@@ -1082,3 +1082,77 @@ def get_heatmap_image():
         heatmap_path,
         media_type="image/png"
     )
+@app.get("/api/analytics/attention-trend")
+def get_attention_trend(
+    db: Session = Depends(get_db)
+):
+    records = (
+        db.query(AttentionRecord)
+        .order_by(
+            AttentionRecord.attention_start_time.asc()
+        )
+        .all()
+    )
+
+    trend = []
+
+    for record in records:
+        timestamp = record.attention_start_time
+
+        if timestamp is not None:
+            timestamp = str(timestamp)
+
+        trend.append({
+            "shopper_id": record.shopper_id,
+            "shelf_id": record.shelf_id,
+            "attention_duration": (
+                record.total_attention_duration or 0
+            ),
+            "attention_percentage": (
+                record.attention_percentage or 0
+            ),
+            "timestamp": timestamp
+        })
+
+    return {
+        "total_records": len(trend),
+        "trend": trend
+    }
+@app.get("/api/analytics/attention-summary")
+def get_attention_summary(
+    db: Session = Depends(get_db)
+):
+    records = db.query(AttentionRecord).all()
+
+    if not records:
+        return {
+            "total_records": 0,
+            "total_attention": 0,
+            "average_attention": 0,
+            "maximum_attention": 0,
+            "minimum_attention": 0
+        }
+
+    durations = [
+        float(record.total_attention_duration or 0)
+        for record in records
+    ]
+
+    total_attention = sum(durations)
+
+    return {
+        "total_records": len(records),
+        "total_attention": round(total_attention, 2),
+        "average_attention": round(
+            total_attention / len(durations),
+            2
+        ),
+        "maximum_attention": round(
+            max(durations),
+            2
+        ),
+        "minimum_attention": round(
+            min(durations),
+            2
+        )
+    }
