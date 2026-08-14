@@ -91,7 +91,11 @@ const RecentActivity = () => {
             </Typography>
           </Box>
 
-          <Box textAlign="right">
+          <Box
+            sx={{
+              textAlign: "right",
+        }}
+>
             <Chip
               label={item.status}
               color={getChipColor(item.status)}

@@ -16,9 +16,18 @@ function StatCard({ title, value, icon, color }) {
       }}
     >
       <CardContent>
-        <Box display="flex" justifyContent="space-between" alignItems="center">
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
           <Box>
-            <Typography variant="subtitle2" color="text.secondary">
+            <Typography
+              variant="subtitle2"
+              color="text.secondary"
+            >
               {title}
             </Typography>
 
@@ -34,7 +43,11 @@ function StatCard({ title, value, icon, color }) {
             </Typography>
           </Box>
 
-          <Box sx={{ color: color }}>
+          <Box
+            sx={{
+              color: color,
+            }}
+          >
             {icon}
           </Box>
         </Box>

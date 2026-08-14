@@ -15,43 +15,228 @@ import ShopperTracking from "./pages/ShopperTracking";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 
+
 function App() {
   return (
     <BrowserRouter>
       <Routes>
 
-        <Route path="/" element={<Login />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/camera-management" element={<CameraManagement />} />
-        <Route path="/store-management" element={<AddStore />} />
-        <Route path="/shopper-tracking" element={<ShopperTracking />} />
-        <Route path="/reports" element={<Reports />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/settings" element={<Settings />} />
+        {/* ===========================
+            PUBLIC ROUTE
+        =========================== */}
 
-        {/* Admin-only */}
         <Route
-          path="/admin"
+          path="/"
+          element={<Login />}
+        />
+
+
+        {/* ===========================
+            DASHBOARD
+            All roles
+        =========================== */}
+
+        <Route
+          path="/dashboard"
           element={
-            <ProtectedRoute>
-              <AdminDashboard />
+            <ProtectedRoute
+              allowedRoles={[
+                "Admin",
+                "Store Manager",
+                "Retail Analyst",
+                "Marketing Manager"
+              ]}
+            >
+              <Dashboard />
             </ProtectedRoute>
           }
         />
+
+
+        {/* ===========================
+            CAMERA MANAGEMENT
+            Admin + Store Manager
+        =========================== */}
+
+        <Route
+          path="/camera-management"
+          element={
+            <ProtectedRoute
+              allowedRoles={[
+                "Admin",
+                "Store Manager"
+              ]}
+            >
+              <CameraManagement />
+            </ProtectedRoute>
+          }
+        />
+
+
+        {/* ===========================
+            STORE MANAGEMENT
+            Admin + Store Manager
+        =========================== */}
+
+        <Route
+          path="/store-management"
+          element={
+            <ProtectedRoute
+              allowedRoles={[
+                "Admin",
+                "Store Manager"
+              ]}
+            >
+              <AddStore />
+            </ProtectedRoute>
+          }
+        />
+
+
+        {/* ===========================
+            SHELF MANAGEMENT
+            Admin + Store Manager
+        =========================== */}
+
         <Route
           path="/add-shelf"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute
+              allowedRoles={[
+                "Admin",
+                "Store Manager"
+              ]}
+            >
               <AddShelf />
             </ProtectedRoute>
           }
         />
 
-        <Route path="*" element={<Navigate to="/" replace />} />
+
+        {/* ===========================
+            SHOPPER TRACKING
+            Admin + Store Manager + Retail Analyst
+        =========================== */}
+
+        <Route
+          path="/shopper-tracking"
+          element={
+            <ProtectedRoute
+              allowedRoles={[
+                "Admin",
+                "Store Manager",
+                "Retail Analyst"
+              ]}
+            >
+              <ShopperTracking />
+            </ProtectedRoute>
+          }
+        />
+
+
+        {/* ===========================
+            REPORTS
+            All roles
+        =========================== */}
+
+        <Route
+          path="/reports"
+          element={
+            <ProtectedRoute
+              allowedRoles={[
+                "Admin",
+                "Store Manager",
+                "Retail Analyst",
+                "Marketing Manager"
+              ]}
+            >
+              <Reports />
+            </ProtectedRoute>
+          }
+        />
+
+
+        {/* ===========================
+            PROFILE
+            All roles
+        =========================== */}
+
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute
+              allowedRoles={[
+                "Admin",
+                "Store Manager",
+                "Retail Analyst",
+                "Marketing Manager"
+              ]}
+            >
+              <Profile />
+            </ProtectedRoute>
+          }
+        />
+
+
+        {/* ===========================
+            SETTINGS
+            All roles
+        =========================== */}
+
+        <Route
+          path="/settings"
+          element={
+            <ProtectedRoute
+              allowedRoles={[
+                "Admin",
+                "Store Manager",
+                "Retail Analyst",
+                "Marketing Manager"
+              ]}
+            >
+              <Settings />
+            </ProtectedRoute>
+          }
+        />
+
+
+        {/* ===========================
+            ADMIN DASHBOARD
+            Admin only
+        =========================== */}
+
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute
+              allowedRoles={[
+                "Admin"
+              ]}
+            >
+              <AdminDashboard />
+            </ProtectedRoute>
+          }
+        />
+
+
+        {/* ===========================
+            UNKNOWN ROUTE
+        =========================== */}
+
+        <Route
+          path="*"
+          element={
+            <Navigate
+              to="/"
+              replace
+            />
+          }
+        />
 
       </Routes>
     </BrowserRouter>
   );
 }
+
 
 export default App;

@@ -9,7 +9,7 @@ import Loader from "../components/Loader";
 import Notification from "../components/Notification";
 import {
   PeopleFill,
-  CameraVideoFill,
+
   EyeFill,
   BarChartFill,
 } from "react-bootstrap-icons";
@@ -25,6 +25,7 @@ import {
   Title,
   Tooltip,
   Legend,
+  Filler,
 } from "chart.js";
 
 import { Line, Bar } from "react-chartjs-2";
@@ -37,7 +38,8 @@ ChartJS.register(
   BarElement,
   Title,
   Tooltip,
-  Legend
+  Legend,
+  Filler
 );
 
 const Dashboard = () => {
@@ -75,14 +77,30 @@ const Dashboard = () => {
     const role = localStorage.getItem("user_role") || "Store Manager";
     setUserRole(role);
 
+    const token = localStorage.getItem("access_token");
+
     const fetchDashboardData = async () => {
       try {
         const [recordsResponse, productsResponse, trendResponse] =
           await Promise.all([
-            fetch("http://127.0.0.1:8000/attention-records"),
-            fetch("http://127.0.0.1:8000/api/product-score"),
-            fetch("http://127.0.0.1:8000/api/analytics/attention-trend"),
-          ]);
+            fetch("http://127.0.0.1:8000/attention-records", {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    }),
+
+    fetch("http://127.0.0.1:8000/api/product-score", {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    }),
+
+    fetch("http://127.0.0.1:8000/api/analytics/attention-trend", {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    }),
+  ]);
 
         const recordsData = await recordsResponse.json();
         const productsData = await productsResponse.json();
@@ -136,7 +154,12 @@ const Dashboard = () => {
     const fetchAttentionSummary = async () => {
       try {
         const response = await fetch(
-          "http://127.0.0.1:8000/api/analytics/attention-summary"
+          "http://127.0.0.1:8000/api/analytics/attention-summary",
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("access_token")}`
+            }
+          }
         );
 
         if (!response.ok) {
@@ -166,7 +189,12 @@ const Dashboard = () => {
     const fetchAttentionTrend = async () => {
       try {
         const response = await fetch(
-          "http://127.0.0.1:8000/api/analytics/attention-trend"
+            "http://127.0.0.1:8000/api/analytics/attention-trend",
+            {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem("access_token")}`
+                }
+            }
         );
 
         if (!response.ok) {

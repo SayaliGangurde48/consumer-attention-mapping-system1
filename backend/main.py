@@ -67,6 +67,27 @@ def get_current_role(
             status_code=401,
             detail="Invalid or expired token"
         )
+def require_authenticated_access(
+    role: str = Depends(get_current_role)
+):
+    return role
+
+
+def require_store_management_access(
+    role: str = Depends(get_current_role)
+):
+    allowed_roles = [
+        "Admin",
+        "Store Manager"
+    ]
+
+    if role not in allowed_roles:
+        raise HTTPException(
+            status_code=403,
+            detail="You do not have permission to manage stores"
+        )
+
+    return role
 def require_report_access(
     role: str = Depends(get_current_role)
 ):
@@ -168,7 +189,9 @@ def register_user(
             detail="Invalid role ID"
         )
 
-    hashed_password = hash_password(user_data.password)
+    hashed_password = hash_password(
+        user_data.password
+    )
 
     new_user = User(
         email=user_data.email,
@@ -186,6 +209,8 @@ def register_user(
         "email": new_user.email,
         "role": role.role_name
     }
+
+
 @app.post("/login")
 def login_user(
     user_data: UserLogin,
@@ -211,7 +236,8 @@ def login_user(
         )
 
     token = create_access_token({
-        "sub": user.email,
+        "sub": str(user.id),
+        "email": user.email,
         "role": user.role.role_name
     })
 
@@ -220,11 +246,25 @@ def login_user(
         "token_type": "bearer",
         "role": user.role.role_name
     }
+
+
 @app.post("/stores")
 def create_store(
     store_data: StoreCreate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    role: str = Depends(get_current_role)
 ):
+    allowed_roles = [
+        "Admin",
+        "Store Manager"
+    ]
+
+    if role not in allowed_roles:
+        raise HTTPException(
+            status_code=403,
+            detail="You do not have permission to create stores"
+        )
+
     new_store = Store(
         store_name=store_data.store_name,
         location=store_data.location
@@ -243,9 +283,11 @@ def create_store(
         }
     }
 
+
 @app.get("/stores")
 def get_stores(
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    role: str = Depends(get_current_role)
 ):
     stores = db.query(Store).all()
 
@@ -257,11 +299,25 @@ def get_stores(
         }
         for store in stores
     ]
+
+
 @app.post("/shelves")
 def create_shelf(
     shelf_data: ShelfCreate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    role: str = Depends(get_current_role)
 ):
+    allowed_roles = [
+        "Admin",
+        "Store Manager"
+    ]
+
+    if role not in allowed_roles:
+        raise HTTPException(
+            status_code=403,
+            detail="You do not have permission to create shelves"
+        )
+
     store = db.query(Store).filter(
         Store.id == shelf_data.store_id
     ).first()
@@ -289,9 +345,12 @@ def create_shelf(
             "zone_name": new_shelf.zone_name
         }
     }
+
+
 @app.get("/shelves")
 def get_shelves(
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    role: str = Depends(get_current_role)
 ):
     shelves = db.query(Shelf).all()
 
@@ -305,7 +364,42 @@ def get_shelves(
     ]
 @app.get("/attention-records")
 def get_attention_records(
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    role: str = Depends(get_current_role)
+):
+    records = db.query(AttentionRecord).all()
+
+    return [
+        {
+            "id": record.id,
+            "shopper_id": record.shopper_id,
+            "shelf_id": record.shelf_id,
+            "attention_start_time": record.attention_start_time,
+            "attention_end_time": record.attention_end_time,
+            "total_attention_duration": record.total_attention_duration,
+            "attention_percentage": record.attention_percentage
+        }
+        for record in records
+    ]
+@app.get("/dashboard-summary")
+def dashboard_summary(
+    db: Session = Depends(get_db),
+    role: str = Depends(require_authenticated_access)
+):
+    shelves = db.query(Shelf).all()
+
+    return [
+        {
+            "id": shelf.id,
+            "store_id": shelf.store_id,
+            "zone_name": shelf.zone_name
+        }
+        for shelf in shelves
+    ]
+@app.get("/top-shopper")
+def get_top_shopper(
+    db: Session = Depends(get_db),
+    role: str = Depends(require_authenticated_access)
 ):
     records = db.query(AttentionRecord).all()
 
@@ -361,7 +455,9 @@ def get_top_shopper(
         "shelf_id": top_record.shelf_id
     }
 @app.get("/api/heatmaps/store")
-def get_store_heatmap():
+def get_store_heatmap(
+    role: str = Depends(require_authenticated_access)
+):
 
     heatmap_path = "heatmap.png"
 
@@ -377,7 +473,10 @@ def get_store_heatmap():
         
     )
 @app.get("/api/product-score")
-def product_score(db: Session = Depends(get_db)):
+def product_score(
+    db: Session = Depends(get_db),
+    role: str = Depends(require_authenticated_access)
+):
 
     products = db.query(Product).all()
 
