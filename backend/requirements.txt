@@ -1,7 +1,13 @@
 fastapi
-uvicorn
+uvicorn[standard]
 sqlalchemy
 psycopg2-binary
 python-dotenv
 pydantic
 python-multipart
+python-jose
+reportlab
+opencv-python
+mediapipe
+numpy
+ultralytics

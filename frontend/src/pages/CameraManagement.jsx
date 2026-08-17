@@ -9,11 +9,13 @@ const CameraManagement = () => {
     location: "Entrance Gate",
     ip: "192.168.1.101",
     resolution: "1920 × 1080",
-    status: "Online"
+    status: "Online",
   });
 
   const [showLive, setShowLive] = useState(false);
   const [editing, setEditing] = useState(false);
+
+  const VIDEO_URL = "http://127.0.0.1:8000/camera-video";
 
   const handleEdit = () => {
     setEditing(true);
@@ -31,6 +33,7 @@ const CameraManagement = () => {
 
     if (confirmed) {
       setCamera(null);
+      setShowLive(false);
     }
   };
 
@@ -44,7 +47,9 @@ const CameraManagement = () => {
 
           <div className="page-header">
             <h2>Camera Management</h2>
-            <p>Manage all surveillance cameras connected to your retail store.</p>
+            <p>
+              Manage all surveillance cameras connected to your retail store.
+            </p>
           </div>
 
           <div className="camera-card">
@@ -85,7 +90,7 @@ const CameraManagement = () => {
                   onChange={(e) =>
                     setCamera({
                       ...camera,
-                      location: e.target.value
+                      location: e.target.value,
                     })
                   }
                 />
@@ -98,7 +103,7 @@ const CameraManagement = () => {
                   onChange={(e) =>
                     setCamera({
                       ...camera,
-                      ip: e.target.value
+                      ip: e.target.value,
                     })
                   }
                 />
@@ -111,7 +116,7 @@ const CameraManagement = () => {
                   onChange={(e) =>
                     setCamera({
                       ...camera,
-                      resolution: e.target.value
+                      resolution: e.target.value,
                     })
                   }
                 />
@@ -174,7 +179,12 @@ const CameraManagement = () => {
         </div>
 
         {showLive && (
-          <div className="camera-card" style={{ marginTop: "20px" }}>
+          <div
+            className="camera-card"
+            style={{
+              marginTop: "20px",
+            }}
+          >
             <div className="camera-top">
               <h4>Live Camera Feed</h4>
 
@@ -188,21 +198,53 @@ const CameraManagement = () => {
 
             <div
               style={{
-                height: "300px",
+                marginTop: "15px",
                 background: "#111827",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color: "white",
                 borderRadius: "10px",
-                marginTop: "15px"
+                overflow: "hidden",
               }}
             >
-              <div style={{ textAlign: "center" }}>
-                <h3>📹 Camera 01</h3>
-                <p>Live camera feed preview</p>
-                <span>● Camera Online</span>
-              </div>
+              <video
+                controls
+                autoPlay
+                muted
+                loop
+                playsInline
+                style={{
+                  width: "100%",
+                  maxHeight: "500px",
+                  display: "block",
+                  objectFit: "contain",
+                  background: "#111827",
+                }}
+              >
+                <source src={VIDEO_URL} type="video/mp4" />
+
+                Your browser does not support the video element.
+              </video>
+            </div>
+
+            <div
+              style={{
+                marginTop: "12px",
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                color: "#16a34a",
+                fontWeight: "600",
+              }}
+            >
+              <span
+                style={{
+                  width: "9px",
+                  height: "9px",
+                  borderRadius: "50%",
+                  background: "#16a34a",
+                  display: "inline-block",
+                }}
+              />
+
+              Camera Online
             </div>
           </div>
         )}

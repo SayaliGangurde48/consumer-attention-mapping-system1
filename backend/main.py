@@ -454,6 +454,24 @@ def get_top_shopper(
         "attention_duration": top_record.total_attention_duration,
         "shelf_id": top_record.shelf_id
     }
+@app.get("/camera-video")
+def get_camera_video():
+    video_path = os.path.join(
+        os.path.dirname(__file__),
+        "test_videos",
+        "retail_test.mp4"
+    )
+
+    if not os.path.exists(video_path):
+        raise HTTPException(
+            status_code=404,
+            detail="Camera video not found"
+        )
+
+    return FileResponse(
+        video_path,
+        media_type="video/mp4"
+    )
 @app.get("/api/heatmaps/store")
 def get_store_heatmap(
     role: str = Depends(require_authenticated_access)
